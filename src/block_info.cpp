@@ -1,5 +1,6 @@
 #include "youbot_object_grasp/block_info.h"
 #include <iostream>
+#include <std_msgs/Float32.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -11,6 +12,7 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
     mBlockPoseSub = nh.subscribe( "/block_pose", 1, &cBlockInfo::BlockCallback, this );
 	mFloorNormalSub = nh.subscribe( "/floor_normal", 1, &cBlockInfo::FloorNormalCallback, this );
 	mRgbBlockLocSub = nh.subscribe( "/rgb_seg/block_location", 1, &cBlockInfo::BlockAlignLocationCallback, this );
+	mRgbBlockRotSub = nh.subscribe( "/rgb_seg/block_rotation", 1, &cBlockInfo::BlockAlignRotationCallback, this);
 
 	// Create the transform listener and then pause 2 seconds to allow tfs to buffer.
 	mpListener = new tf::TransformListener();
@@ -89,6 +91,13 @@ tf::Transform cBlockInfo::GetTransformA5ToBlock() const
 const tf::Vector3& cBlockInfo::GetBlockAlignmentPosition() const
 {
 	return mBlockAlignmentLocation;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const float cBlockInfo::GetBlockAlignmentRotation() const
+{
+	return mBlockAlignmentRotation;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +185,13 @@ void cBlockInfo::BlockAlignLocationCallback( const geometry_msgs::Point& loc )
 	mBlockAlignmentLocation.setZ(loc.z);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
+{
+	float pi = 3.1415926535897931;
+	mBlockAlignmentRotation = rot.data*pi/180;
+}
 ////////////////////////////////////////////////////////////////////////////////
 //  Helper Functions
 ////////////////////////////////////////////////////////////////////////////////

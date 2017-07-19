@@ -7,7 +7,7 @@
 #include <geometry_msgs/Point.h>
 #include <nav_msgs/Odometry.h>
 #include <actionlib_msgs/GoalStatusArray.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Int32.h>
 #include <std_msgs/Bool.h>
 #include <tf/LinearMath/Transform.h>
 #include <tf/LinearMath/Quaternion.h>
@@ -17,6 +17,7 @@
 
 #include "youbot_object_grasp/arm_interface_gazebo.h"
 #include "youbot_object_grasp/arm_interface_youbot.h"
+#include "youbot_object_grasp/arm_interface.h"
 #include "youbot_object_grasp/base_control.h"
 #include "youbot_object_grasp/block_info.h"
 
@@ -33,12 +34,12 @@ enum ProcessState
 	AligningToBlock,
 	GraspingBlock,
 	PuttingArmInCarryPose,
-	InitiatingReturnToStart,
+	/*InitingReturnToStart,
 	ReturningToStart,
 	PrepareForDrop,
 	DropBlock,
 	ReturnToPickupPoint,
-	MoveToFinish,
+	MoveToFinish,*/
 	Finished
 };
 
@@ -47,12 +48,49 @@ int main( int argc, char** argv )
 {
 	ros::init(argc, argv, "arm_control");
     ros::NodeHandle nh("~");
+    ros::Publisher mStatePub = nh.advertise<std_msgs::Int32>( "/control_current_state", 1 );
+    int controllerState = 0;
 
 
 	// --- Constants --- //
 
-	const double adjustmentBaseSpeed = 0.0075;
-	
+	const double adjustmentBaseSpeed = 0.0073;
+
+	//--Initial Grasp Position Values--//
+	/*tf::Transform mG_RightHomePose_05;
+	tf::Transform mG_LeftHomePose_05;
+	tf::Transform mG_RightGraspPose_05;
+	tf::Transform mG_LeftGraspPose_05;
+	tf::Transform translate;
+	tf::Vector3 t;
+	std::vector<double> mArmLeft90DegSeedVals;
+	std::vector<double> mArmRight90DegSeedVals;
+
+	translate.setIdentity();
+	translate.getOrigin().setZ( 0.084 );
+
+	tf::Quaternion q( 0.692, 0.687, -0.16, 0.154 );
+	t.setValue( 0.017, -0.331, 0.059 );
+	mG_RightHomePose_05.setRotation(q);
+	mG_RightHomePose_05.setOrigin(t);
+	mArmRight90DegSeedVals[0] =  4.56;
+	mArmRight90DegSeedVals[1] = 2.04427;
+	mArmRight90DegSeedVals[2]-1.51891;
+	mArmRight90DegSeedVals[3] = 2.54343;
+	mArmRight90DegSeedVals[4] = 2.93883;
+	mG_RightGraspPose_05 = mG_RightHomePose_05 * translate;
+
+	q.setValue( 0.704, -0.675, -0.158, -0.156 );
+	t.setValue( 0.015, 0.331, 0.059 );
+	mG_LeftHomePose_05.setRotation(q);
+	mG_LeftHomePose_05.setOrigin(t);
+	mArmLeft90DegSeedVals[0] = 1.37;
+	mArmLeft90DegSeedVals[1] = 2.04427;
+	mArmLeft90DegSeedVals[2] = -1.51891;
+	mArmLeft90DegSeedVals[3] = 2.54343;
+	mArmLeft90DegSeedVals[4] = 2.93883;
+	mG_LeftGraspPose_05 = mG_LeftHomePose_05 * translate;
+	*/
 	
 	// --- Parameters --- //
 	
@@ -146,12 +184,12 @@ int main( int argc, char** argv )
 				if( pickupGoal.getOrigin().getY() < 0.0 )
 				{
 					graspingLeft = false;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.3 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.35 );
 				}
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.3 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.50 );
 				}
 
 				pickupGoal.setBasis( tf::Matrix3x3::getIdentity() );
@@ -196,6 +234,9 @@ int main( int argc, char** argv )
 			
 			ros::Duration(4).sleep();  // Wait for the arm to get to the position.
 
+			controllerState = 4;
+			mStatePub.publish(controllerState);
+			ros::Duration(2).sleep(); //Wait for camera to adjust to lighting
 			currentState = AligningToBlock;
 			std::cout << "Exiting MovingArmToSearchPose state" << std::endl;
 			break;
@@ -208,23 +249,23 @@ int main( int argc, char** argv )
 			double xCmdVel = 0;
 			double yCmdVel = 0;
 			const tf::Vector3& finalBlockLoc = pBlockInfo->GetBlockAlignmentPosition();
-			if( finalBlockLoc.getX() > 350.0 + 2.0 )
+			if( finalBlockLoc.getX() > 375.0 + 5.0 )
 			{
 				// Move towards front of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getX() < 350.0 - 2.0 )
+			else if( finalBlockLoc.getX() < 375.0 - 5.0 )
 			{
 				// Move towards rear of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
 			}
 
-			if( finalBlockLoc.getY() > 415.0 + 10.0 )
+			if( finalBlockLoc.getY() > 410.0 + 10.0 )
 			{
 				// Move to the left when grasping right, opposite when left
 				yCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getY() < 415.0 - 10.0 )
+			else if( finalBlockLoc.getY() < 410.0 - 10.0 )
 			{
 				// Move to the right when grasping right, opposite when left
 				yCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
@@ -243,6 +284,10 @@ int main( int argc, char** argv )
 			{
 				// TODO:  Use a timer instead of just a simple counter.
 				++stopBaseCounter;
+				controllerState = 0;
+				mStatePub.publish(controllerState);
+				std::cout << finalBlockLoc.getX() << std::endl;
+				std::cout << finalBlockLoc.getY() << std::endl;				
 				currentState = GraspingBlock;
 				std::cout << "Exiting AligningToBlock state" << std::endl;
 			}
@@ -267,16 +312,25 @@ int main( int argc, char** argv )
 			std::cout << "Waiting 4 seconds to allow grippers to open." << std::endl;
 			ros::Duration(4).sleep();
 
+			//--Rotating Grippers--//
+			const float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();
+
 
 			// --- Establish Goal Position --- //
 
 			std::cout << "Reaching to grasp." << std::endl;
 			if( graspingLeft )
 			{
+				//mArmRight90DegSeedVals[4] = finalBlockRot;
+				//pArmInterface->PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
+				std::cout << finalBlockRot << std::cout;
 				pArmInterface->GoToLeftGraspPose();
 			}
 			else
 			{
+				//mArmRight90DegSeedVals[4] = finalBlockRot;
+				//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
+				std::cout <<finalBlockRot << std::cout;
 				pArmInterface->GoToRightGraspPose();
 			}
 			std::cout << "Waiting 3 seconds to allow arm to finish moving." << std::endl;
@@ -316,19 +370,22 @@ int main( int argc, char** argv )
 			std::cout << "Waiting 3 seconds to allow arm to reach pose" << std::endl;
 			ros::Duration(3.0).sleep();  // Allow the arm to reach the pose.
 
-			currentState = InitiatingReturnToStart;
+			//CurrentState = InitiatingReturnToStart;
+			controllerState=0;
+			mStatePub.publish(controllerState);
+			currentState = Finished;
 			std::cout << "Exiting PuttingArmInCarryPose state" << std::endl;
 			break;
 		}
 
-
+		/*
 		case InitiatingReturnToStart:
 		{
 			std::cout << std::endl;
 			std::cout << "Entering InitiatingReturnToStart state" << std::endl;
 			std::cout << "Publishing goal and waiting for status to change" << std::endl;
 
-			pBaseController->MoveToWorldPosition( g_StartingPose_w );
+			pBaseController->MoveToWorlPosition( g_StartingPose_w );
 
 			currentState = ReturningToStart;
 			std::cout << "Exiting InitiatingReturnToStart" << std::endl;
@@ -424,6 +481,7 @@ int main( int argc, char** argv )
 			break;
 		}
 		
+		*/
 
 		default:
 			break;

@@ -2,6 +2,7 @@
 #define INCLUDED_ARM_INTERFACE_H
 
 #include <moveit/kinematics_base/kinematics_base.h>
+#include <ros/ros.h>
 #include <tf/LinearMath/Transform.h>
 #include <vector>
 
@@ -14,6 +15,7 @@ public:
 	//--------------------------------------------------------------------------//
 
 	cArmInterface(const tf::Transform& g_arm0_to_base_link);
+	cArmInterface(const tf::Transform& g_arm0_to_base_link, ros::NodeHandle& nh);
 
 
 	//--------------------------------------------------------------------------//

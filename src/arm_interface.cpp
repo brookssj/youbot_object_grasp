@@ -5,6 +5,8 @@
 #include <tf/LinearMath/Vector3.h>
 #include <tf/LinearMath/Matrix3x3.h>
 #include <iostream>
+#include "youbot_object_grasp/block_info.h"
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 cArmInterface::cArmInterface(const tf::Transform& g_arm0_to_base_link)
-	:	mGripperWidthAtGrasp( 0.0025 ),
-		mGripperWidthOpen( 0.0099 )
+	:	mGripperWidthAtGrasp( 0.009 ),
+		mGripperWidthOpen( 0.0115 )
 {
     pluginlib::ClassLoader<kinematics::KinematicsBase> loader("moveit_core", "kinematics::KinematicsBase");
     mpArmKinematics = loader.createInstance("youbot_arm_kinematics_moveit::KinematicsPlugin");
@@ -71,7 +73,7 @@ cArmInterface::cArmInterface(const tf::Transform& g_arm0_to_base_link)
 
 	// Grasp pose
 
-	translate.getOrigin().setZ( 0.094 );
+	translate.getOrigin().setZ( 0.084 );
 	mG_RightGraspPose_05 = mG_RightHomePose_05 * translate;
 	
 
@@ -98,7 +100,7 @@ cArmInterface::cArmInterface(const tf::Transform& g_arm0_to_base_link)
 
 	// Grasp pose
 
-	translate.getOrigin().setZ( 0.094 );
+	translate.getOrigin().setZ( 0.084 );
 	mG_LeftGraspPose_05 = mG_LeftHomePose_05 * translate;
 }
 
@@ -173,7 +175,11 @@ void cArmInterface::GoToRightHomePose()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/*ros::NodeHandle nh("~");
+cBlockInfo* pBlockInfo = new cBlockInfo(nh);
+const float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();*/
 
+////////////////////////////////////////////////////////////////////////////////
 void cArmInterface::GoToRightAlignPose()
 {
 	PositionArm( mG_RightAlignPose_05, mArmRight90DegSeedVals );
@@ -183,6 +189,7 @@ void cArmInterface::GoToRightAlignPose()
 
 void cArmInterface::GoToRightGraspPose()
 {
+	//mArmRight90DegSeedVals[4] = finalBlockRot;
 	PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
 }
 
@@ -204,5 +211,6 @@ void cArmInterface::GoToLeftAlignPose()
 
 void cArmInterface::GoToLeftGraspPose()
 {
+	//mArmLeft90DegSeedVals[4] = finalBlockRot;
 	PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
 }
