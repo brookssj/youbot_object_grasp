@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 cArmInterface::cArmInterface(const tf::Transform& g_arm0_to_base_link)
-	:	mGripperWidthAtGrasp( 0.009 ),
+	:	mGripperWidthAtGrasp( 0.000 ),
 		mGripperWidthOpen( 0.0115 )
 {
     pluginlib::ClassLoader<kinematics::KinematicsBase> loader("moveit_core", "kinematics::KinematicsBase");

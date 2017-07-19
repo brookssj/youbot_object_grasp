@@ -34,12 +34,12 @@ enum ProcessState
 	AligningToBlock,
 	GraspingBlock,
 	PuttingArmInCarryPose,
-	/*InitingReturnToStart,
-	ReturningToStart,
+	//InitingReturnToStart,
+	//ReturningToStart,
 	PrepareForDrop,
 	DropBlock,
-	ReturnToPickupPoint,
-	MoveToFinish,*/
+	//ReturnToPickupPoint,
+	//MoveToFinish,
 	Finished
 };
 
@@ -160,7 +160,15 @@ int main( int argc, char** argv )
 	// --- Begin --- //
 
 	bool graspingLeft = false;
-	ProcessState currentState = WaitingForBlock;
+	ProcessState currentState;
+	if (controllerState == 6)
+		{
+			currentState = PrepareForDrop;
+		} 
+	else
+		{	currentState = WaitingForBlock;
+		}
+
 	tf::Transform g_StartingPose_w;
 	tf::Transform pickupGoal;
 	int stopBaseCounter = 0;
@@ -184,12 +192,12 @@ int main( int argc, char** argv )
 				if( pickupGoal.getOrigin().getY() < 0.0 )
 				{
 					graspingLeft = false;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.35 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.27 );
 				}
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.50 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.45 );
 				}
 
 				pickupGoal.setBasis( tf::Matrix3x3::getIdentity() );
@@ -249,12 +257,12 @@ int main( int argc, char** argv )
 			double xCmdVel = 0;
 			double yCmdVel = 0;
 			const tf::Vector3& finalBlockLoc = pBlockInfo->GetBlockAlignmentPosition();
-			if( finalBlockLoc.getX() > 375.0 + 5.0 )
+			if( finalBlockLoc.getX() > 374.0 + 4.0 )
 			{
 				// Move towards front of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getX() < 375.0 - 5.0 )
+			else if( finalBlockLoc.getX() < 374.0 - 3.0 )
 			{
 				// Move towards rear of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
@@ -407,7 +415,7 @@ int main( int argc, char** argv )
 			}
 			break;
 		}
-
+		*/
 		
 		case PrepareForDrop:
 		{
@@ -456,20 +464,20 @@ int main( int argc, char** argv )
 			pArmInterface->CloseGrippers();
 			ros::Duration(1.0).sleep();  // Allow the arm to reach the pose.
 
-			std::cout << "Publishing nav goal to go back to the pickup location" << std::endl;
+			/*std::cout << "Publishing nav goal to go back to the pickup location" << std::endl;
 			tf::Transform rotate;
 			rotate.setIdentity();
 			rotate.getBasis().setRPY(0, 0, 3.14);
-			pBaseController->MoveRelativeToArmLink0( pickupGoal * rotate );
+			pBaseController->MoveRelativeToArmLink0( pickupGoal * rotate );*/
 
-			currentState = MoveToFinish;
+			currentState = Finished;
 			std::cout << "Exiting DropBlock state" << std::endl;
-			std::cout << "Entering ReturnToPickupPoint state" << std::endl;
+			//std::cout << "Entering ReturnToPickupPoint state" << std::endl;
 			std::cout << std::endl;
 			break;
 		}
 
-		
+		/*
 		case ReturnToPickupPoint:
 		{
 			if( !pBaseController->MovingToMoveBaseGoal() )
