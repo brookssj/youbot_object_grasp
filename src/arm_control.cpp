@@ -257,12 +257,12 @@ int main( int argc, char** argv )
 			double xCmdVel = 0;
 			double yCmdVel = 0;
 			const tf::Vector3& finalBlockLoc = pBlockInfo->GetBlockAlignmentPosition();
-			if( finalBlockLoc.getX() > 374.0 + 4.0 )
+			if( finalBlockLoc.getX() > 374.0 + 9.0 )
 			{
 				// Move towards front of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getX() < 374.0 - 3.0 )
+			else if( finalBlockLoc.getX() < 376.0 - 3.0 )
 			{
 				// Move towards rear of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
