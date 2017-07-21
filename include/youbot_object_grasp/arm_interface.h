@@ -42,6 +42,10 @@ public:
 	// Return - true if the IK was successful, false otherwise.
 	virtual bool PositionArm(const tf::Transform& g, const std::vector<double>& seedVals);
 
+	void SetRightSeedVal(int index, float val);
+
+	void SetLeftSeedVal(int index, float val);
+
 	void OpenGrippers();
 
 	void CloseGrippers();

@@ -146,6 +146,16 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void cArmInterface::SetRightSeedVal(int index, float val)
+{
+	mArmRight90DegSeedVals[index] = val;
+}
+
+void cArmInterface::SetLeftSeedVal(int index, float val)
+{
+	mArmLeft90DegSeedVals[index] = val;
+}
+
 void cArmInterface::OpenGrippers()
 {
 	PublishGripperValues( mGripperWidthOpen );

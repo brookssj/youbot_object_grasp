@@ -89,8 +89,8 @@ int main( int argc, char** argv )
 	mArmLeft90DegSeedVals[2] = -1.51891;
 	mArmLeft90DegSeedVals[3] = 2.54343;
 	mArmLeft90DegSeedVals[4] = 2.93883;
-	mG_LeftGraspPose_05 = mG_LeftHomePose_05 * translate;
-	*/
+	mG_LeftGraspPose_05 = mG_LeftHomePose_05 * translate;*/
+	
 	
 	// --- Parameters --- //
 	
@@ -292,8 +292,6 @@ int main( int argc, char** argv )
 			{
 				// TODO:  Use a timer instead of just a simple counter.
 				++stopBaseCounter;
-				controllerState = 0;
-				mStatePub.publish(controllerState);
 				std::cout << finalBlockLoc.getX() << std::endl;
 				std::cout << finalBlockLoc.getY() << std::endl;				
 				currentState = GraspingBlock;
@@ -323,7 +321,6 @@ int main( int argc, char** argv )
 			//--Rotating Grippers--//
 			const float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();
 
-
 			// --- Establish Goal Position --- //
 
 			std::cout << "Reaching to grasp." << std::endl;
@@ -331,6 +328,7 @@ int main( int argc, char** argv )
 			{
 				//mArmRight90DegSeedVals[4] = finalBlockRot;
 				//pArmInterface->PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
+				pArmInterface->SetRightSeedVal(4, finalBlockRot);
 				std::cout << finalBlockRot << std::cout;
 				pArmInterface->GoToLeftGraspPose();
 			}
@@ -338,6 +336,7 @@ int main( int argc, char** argv )
 			{
 				//mArmRight90DegSeedVals[4] = finalBlockRot;
 				//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
+				pArmInterface->SetLeftSeedVal(4, finalBlockRot);
 				std::cout <<finalBlockRot << std::cout;
 				pArmInterface->GoToRightGraspPose();
 			}
@@ -349,6 +348,8 @@ int main( int argc, char** argv )
 			std::cout << "Waiting 4 seconds to allow grippers to close." << std::endl;
 			ros::Duration(4).sleep();
 			
+			controllerState = 0;
+			mStatePub.publish(controllerState);
 			currentState = PuttingArmInCarryPose;
 			std::cout << "Exiting GraspingBlock state" << std::endl;
 			break;
