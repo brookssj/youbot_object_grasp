@@ -54,7 +54,7 @@ int main( int argc, char** argv )
 
 	// --- Constants --- //
 
-	const double adjustmentBaseSpeed = 0.0073;
+	const double adjustmentBaseSpeed = 0.0075;
 
 	//--Initial Grasp Position Values--//
 	/*tf::Transform mG_RightHomePose_05;
@@ -163,7 +163,8 @@ int main( int argc, char** argv )
 	ProcessState currentState;
 	if (controllerState == 6)
 		{
-			currentState = PrepareForDrop;
+			graspingLeft = true;
+			currentState = MovingArmToSearchPose;
 		} 
 	else
 		{	currentState = WaitingForBlock;
@@ -197,9 +198,10 @@ int main( int argc, char** argv )
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.45 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.40 );
 				}
 
+				//pickupGoal.getOrigin().setX( pickupGoal.getOrigin().getX() + .10 );
 				pickupGoal.setBasis( tf::Matrix3x3::getIdentity() );
 
 				std::cout << "Publishing move goal" << std::endl;
@@ -262,18 +264,18 @@ int main( int argc, char** argv )
 				// Move towards front of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getX() < 376.0 - 3.0 )
+			else if( finalBlockLoc.getX() < 373.0 - 3.0 )
 			{
 				// Move towards rear of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
 			}
 
-			if( finalBlockLoc.getY() > 410.0 + 10.0 )
+			if( finalBlockLoc.getY() > 425.0 + 5.0 )
 			{
 				// Move to the left when grasping right, opposite when left
 				yCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getY() < 410.0 - 10.0 )
+			else if( finalBlockLoc.getY() < 425.0 - 5 )
 			{
 				// Move to the right when grasping right, opposite when left
 				yCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
