@@ -164,7 +164,8 @@ int main( int argc, char** argv )
 	if (controllerState == 6)
 		{
 			graspingLeft = true;
-			currentState = MovingArmToSearchPose;
+			pArmInterface->GoToLeftAlignPose();
+			currentState = Finished;
 		} 
 	else
 		{	currentState = WaitingForBlock;
@@ -198,7 +199,7 @@ int main( int argc, char** argv )
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.40 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.45 );
 				}
 
 				//pickupGoal.getOrigin().setX( pickupGoal.getOrigin().getX() + .10 );
@@ -246,7 +247,6 @@ int main( int argc, char** argv )
 
 			controllerState = 4;
 			mStatePub.publish(controllerState);
-			ros::Duration(2).sleep(); //Wait for camera to adjust to lighting
 			currentState = AligningToBlock;
 			std::cout << "Exiting MovingArmToSearchPose state" << std::endl;
 			break;
@@ -384,7 +384,7 @@ int main( int argc, char** argv )
 			//CurrentState = InitiatingReturnToStart;
 			controllerState=0;
 			mStatePub.publish(controllerState);
-			currentState = Finished;
+			currentState = PrepareForDrop;
 			std::cout << "Exiting PuttingArmInCarryPose state" << std::endl;
 			break;
 		}
@@ -396,7 +396,7 @@ int main( int argc, char** argv )
 			std::cout << "Entering InitiatingReturnToStart state" << std::endl;
 			std::cout << "Publishing goal and waiting for status to change" << std::endl;
 
-			pBaseController->MoveToWorlPosition( g_StartingPose_w );
+			pBaseController->MoveToWorldPosition( g_StartingPose_w );
 
 			currentState = ReturningToStart;
 			std::cout << "Exiting InitiatingReturnToStart" << std::endl;
