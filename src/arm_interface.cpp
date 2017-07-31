@@ -146,14 +146,38 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void cArmInterface::SetRightSeedVal(int index, float val)
+void cArmInterface::SetRightSeedVal(int index, float val, int pose)
 {
 	mArmRight90DegSeedVals[index] = val;
+	if (pose==1)
+	{
+		PublishJointValues(mArmRight90DegSeedVals);
+	}
+	if (pose==2)
+	{
+		PositionArm(mG_RightGraspPose_05, mArmRight90DegSeedVals);
+	}
 }
 
-void cArmInterface::SetLeftSeedVal(int index, float val)
+void cArmInterface::SetLeftSeedVal(float val, int pose)
 {
-	mArmLeft90DegSeedVals[index] = val;
+	if (pose==1)
+	{
+		mArmLeft90DegSeedVals[0] = 1.35166;
+		mArmLeft90DegSeedVals[1] = 1.55969;
+		mArmLeft90DegSeedVals[2] = -1.4778;
+		mArmLeft90DegSeedVals[3] = 2.98724;
+		mArmLeft90DegSeedVals[4] = val;
+		for( std::size_t i = 0; i < mArmLeft90DegSeedVals.size(); ++i )
+		{
+			std::cerr << "New Joint " << i+1 << ": " << mArmLeft90DegSeedVals[i] << std::endl;
+		}
+		PublishJointValues(mArmLeft90DegSeedVals);
+	}
+	if (pose==2)
+	{
+		PositionArm(mG_LeftGraspPose_05, mArmLeft90DegSeedVals);
+	}
 }
 
 void cArmInterface::OpenGrippers()
@@ -185,11 +209,7 @@ void cArmInterface::GoToRightHomePose()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/*ros::NodeHandle nh("~");
-cBlockInfo* pBlockInfo = new cBlockInfo(nh);
-const float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();*/
 
-////////////////////////////////////////////////////////////////////////////////
 void cArmInterface::GoToRightAlignPose()
 {
 	PositionArm( mG_RightAlignPose_05, mArmRight90DegSeedVals );

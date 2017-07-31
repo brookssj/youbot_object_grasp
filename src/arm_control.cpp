@@ -49,7 +49,7 @@ int main( int argc, char** argv )
 	ros::init(argc, argv, "arm_control");
     ros::NodeHandle nh("~");
     ros::Publisher mStatePub = nh.advertise<std_msgs::Int32>( "/control_current_state", 1 );
-    int controllerState = 0;
+    int controllerState = 6;
 
 
 	// --- Constants --- //
@@ -57,20 +57,20 @@ int main( int argc, char** argv )
 	const double adjustmentBaseSpeed = 0.0075;
 
 	//--Initial Grasp Position Values--//
-	/*tf::Transform mG_RightHomePose_05;
-	tf::Transform mG_LeftHomePose_05;
-	tf::Transform mG_RightGraspPose_05;
-	tf::Transform mG_LeftGraspPose_05;
-	tf::Transform translate;
-	tf::Vector3 t;
-	std::vector<double> mArmLeft90DegSeedVals;
-	std::vector<double> mArmRight90DegSeedVals;
+	//tf::Transform mG_RightHomePose_05;
+	/*tf::Transform mG_LeftHomePose_03;
+	//tf::Transform mG_RightGraspPose_05;
+	tf::Transform mG_LeftGraspPose_03;
+	tf::Transform translation;
+	tf::Vector3 p;
+	std::vector<double> mArmLeftSeedVals;
+	//std::vector<double> mArmRight90DegSeedVals;
 
-	translate.setIdentity();
-	translate.getOrigin().setZ( 0.084 );
+	translation.setIdentity();
+	translation.getOrigin().setZ( 0.084 );
 
-	tf::Quaternion q( 0.692, 0.687, -0.16, 0.154 );
-	t.setValue( 0.017, -0.331, 0.059 );
+	tf::Quaternion v( 0.692, 0.687, -0.16, 0.154 );
+	p.setValue( 0.017, -0.331, 0.059 );
 	mG_RightHomePose_05.setRotation(q);
 	mG_RightHomePose_05.setOrigin(t);
 	mArmRight90DegSeedVals[0] =  4.56;
@@ -80,16 +80,16 @@ int main( int argc, char** argv )
 	mArmRight90DegSeedVals[4] = 2.93883;
 	mG_RightGraspPose_05 = mG_RightHomePose_05 * translate;
 
-	q.setValue( 0.704, -0.675, -0.158, -0.156 );
-	t.setValue( 0.015, 0.331, 0.059 );
-	mG_LeftHomePose_05.setRotation(q);
-	mG_LeftHomePose_05.setOrigin(t);
-	mArmLeft90DegSeedVals[0] = 1.37;
-	mArmLeft90DegSeedVals[1] = 2.04427;
-	mArmLeft90DegSeedVals[2] = -1.51891;
-	mArmLeft90DegSeedVals[3] = 2.54343;
-	mArmLeft90DegSeedVals[4] = 2.93883;
-	mG_LeftGraspPose_05 = mG_LeftHomePose_05 * translate;*/
+	v.setValue( 0.704, -0.675, -0.158, -0.156 );
+	p.setValue( 0.015, 0.331, 0.059 );
+	mG_LeftHomePose_03.setRotation(v);
+	mG_LeftHomePose_03.setOrigin(p);
+	mArmLeftSeedVals[0] = 1.37;
+	mArmLeftSeedVals[1] = 2.04427;
+	mArmLeftSeedVals[2] = -1.51891;
+	mArmLeftSeedVals[3] = 2.54343;
+	mArmLeftSeedVals[4] = 2.93883;
+	mG_LeftGraspPose_03 = mG_LeftHomePose_03 * translation;*/
 	
 	
 	// --- Parameters --- //
@@ -164,8 +164,15 @@ int main( int argc, char** argv )
 	if (controllerState == 6)
 		{
 			graspingLeft = true;
-			pArmInterface->GoToLeftAlignPose();
-			currentState = Finished;
+			//pArmInterface->SetLeftSeedVal(2.93883, 1);
+			//ros::Duration(3).sleep();
+			//pArmInterface->SetLeftSeedVal(2.0, 1);
+			//ros::Duration(3).sleep();
+			//pArmInterface->SetLeftSeedVal(2.0, 2);
+			currentState = MovingArmToSearchPose;
+			//pArmInterface->GoToLeftAlignPose();
+			//currentState = Finished;
+			//currentState = MovingArmToSearchPose;
 		} 
 	else
 		{	currentState = WaitingForBlock;
@@ -328,19 +335,26 @@ int main( int argc, char** argv )
 			std::cout << "Reaching to grasp." << std::endl;
 			if( graspingLeft )
 			{
-				//mArmRight90DegSeedVals[4] = finalBlockRot;
-				//pArmInterface->PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
-				pArmInterface->SetRightSeedVal(4, finalBlockRot);
-				std::cout << finalBlockRot << std::cout;
-				pArmInterface->GoToLeftGraspPose();
+				std::cout << "finalBlockRot is " << std::endl;
+				std::cout << finalBlockRot << std::endl;
+				std::cout << "Rotating Grippers" << std::endl;
+				ros::Duration(2).sleep();
+				pArmInterface->SetLeftSeedVal(finalBlockRot, 1);
+				ros::Duration(2).sleep();
+				currentState = Finished;
+				//pArmInterface->SetLeftSeedVal(finalBlockRot, 2);
+				//pArmInterface->GoToLeftGraspPose();
 			}
 			else
 			{
 				//mArmRight90DegSeedVals[4] = finalBlockRot;
 				//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
-				pArmInterface->SetLeftSeedVal(4, finalBlockRot);
-				std::cout <<finalBlockRot << std::cout;
-				pArmInterface->GoToRightGraspPose();
+				std::cout << "finalBlockRot is " << std::endl;
+				std::cout << finalBlockRot << std::endl;
+				pArmInterface->SetRightSeedVal(4, finalBlockRot, 1);
+				ros::Duration(3).sleep();
+				pArmInterface->SetRightSeedVal(4, finalBlockRot, 2);
+				//pArmInterface->GoToRightGraspPose();
 			}
 			std::cout << "Waiting 3 seconds to allow arm to finish moving." << std::endl;
 			ros::Duration(3.0).sleep();
@@ -352,7 +366,7 @@ int main( int argc, char** argv )
 			
 			controllerState = 0;
 			mStatePub.publish(controllerState);
-			currentState = PuttingArmInCarryPose;
+			//currentState = PuttingArmInCarryPose;
 			std::cout << "Exiting GraspingBlock state" << std::endl;
 			break;
 		}
@@ -384,7 +398,8 @@ int main( int argc, char** argv )
 			//CurrentState = InitiatingReturnToStart;
 			controllerState=0;
 			mStatePub.publish(controllerState);
-			currentState = PrepareForDrop;
+			//currentState = PrepareForDrop;
+			currentState = Finished;
 			std::cout << "Exiting PuttingArmInCarryPose state" << std::endl;
 			break;
 		}

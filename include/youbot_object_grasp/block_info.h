@@ -7,6 +7,7 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Point.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 #include <tf/LinearMath/Transform.h>
 #include <tf/LinearMath/Vector3.h>
 #include <tf/transform_listener.h>
@@ -30,11 +31,13 @@ public:
 	//--------------------------------------------------------------------------//
 
 	bool BlockFound() const;
+	bool blockDimension;
 
 	tf::Transform GetTransformA5ToBlock() const;
 
 	const tf::Vector3& GetBlockAlignmentPosition() const;
 	const float GetBlockAlignmentRotation() const;
+	const bool GetBlockDimension() const;
 	
 
 private:
@@ -47,6 +50,7 @@ private:
 	void FloorNormalCallback( const geometry_msgs::Vector3& norm );
 	void BlockAlignLocationCallback( const geometry_msgs::Point& loc );
 	void BlockAlignRotationCallback ( const std_msgs::Float32& rot );
+	void BlockDimensionCallback ( const std_msgs::Bool& dim );
 
 
 	//--------------------------------------------------------------------------//
@@ -64,6 +68,7 @@ private:
 	ros::Subscriber mFloorNormalSub;
 	ros::Subscriber mRgbBlockLocSub;
 	ros::Subscriber mRgbBlockRotSub;
+	ros::Subscriber mRgbBlockDimSub;
 
 	tf::Transform mG_A5ToAsus;
 	tf::Transform mG_AsusCorrection;

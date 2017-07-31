@@ -13,6 +13,7 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 	mFloorNormalSub = nh.subscribe( "/floor_normal", 1, &cBlockInfo::FloorNormalCallback, this );
 	mRgbBlockLocSub = nh.subscribe( "/rgb_seg/block_location", 1, &cBlockInfo::BlockAlignLocationCallback, this );
 	mRgbBlockRotSub = nh.subscribe( "/rgb_seg/block_rotation", 1, &cBlockInfo::BlockAlignRotationCallback, this);
+	mRgbBlockDimSub = nh.subscribe( "/rgb_seg/block_dimension", 1, &cBlockInfo::BlockDimensionCallback, this);
 
 	// Create the transform listener and then pause 2 seconds to allow tfs to buffer.
 	mpListener = new tf::TransformListener();
@@ -189,8 +190,32 @@ void cBlockInfo::BlockAlignLocationCallback( const geometry_msgs::Point& loc )
 
 void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
 {
+	bool dims = GetBlockDimension();
 	float pi = 3.1415926535897931;
-	mBlockAlignmentRotation = rot.data*pi/180;
+	if (rot.data*-1 < 8 or rot.data*-1 > 80 and dims == false)
+	{
+		mBlockAlignmentRotation = 2.9883;
+	}
+	else
+	{
+		mBlockAlignmentRotation = rot.data*(-1)*pi/180;
+	}
+
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const bool cBlockInfo::GetBlockDimension() const
+{
+	return blockDimension;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void cBlockInfo::BlockDimensionCallback(const std_msgs::Bool& dim)
+{
+	blockDimension = dim.data;
 }
 ////////////////////////////////////////////////////////////////////////////////
 //  Helper Functions

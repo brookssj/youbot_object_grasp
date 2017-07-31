@@ -42,9 +42,9 @@ public:
 	// Return - true if the IK was successful, false otherwise.
 	virtual bool PositionArm(const tf::Transform& g, const std::vector<double>& seedVals);
 
-	void SetRightSeedVal(int index, float val);
+	void SetRightSeedVal(int index, float val, int pose);
 
-	void SetLeftSeedVal(int index, float val);
+	void SetLeftSeedVal(float val, int pose);
 
 	void OpenGrippers();
 
@@ -66,7 +66,7 @@ public:
 	void GoToLeftGraspPose();
 
 	
-protected:
+//protected:
 
 	//--------------------------------------------------------------------------//
 	//---------------------------  HELPER FUNCTIONS  ---------------------------//
@@ -83,7 +83,7 @@ protected:
     KinematicsBasePtr mpArmKinematics;
 
 	
-private:
+//private:
 
 	std::vector<double> mCameraSearchPoseSeedVals;
 	tf::Transform mG_CameraSearch_05;

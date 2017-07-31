@@ -27,7 +27,7 @@ public:
 	virtual void PublishJointValues(const std::vector<double>& values);
 
 	
-protected:
+//protected:
 
 	//--------------------------------------------------------------------------//
 	//---------------------------  HELPER FUNCTIONS  ---------------------------//
@@ -40,7 +40,7 @@ protected:
 	virtual void PublishGripperValues(double width);
 
 
-private:
+//private:
 
 	ros::Publisher mArmJointsPub;
 	ros::Publisher mGripperPub;
