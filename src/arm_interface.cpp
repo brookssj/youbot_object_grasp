@@ -176,7 +176,16 @@ void cArmInterface::SetLeftSeedVal(float val, int pose)
 	}
 	if (pose==2)
 	{
-		PositionArm(mG_LeftGraspPose_05, mArmLeft90DegSeedVals);
+		mArmLeft90DegSeedVals[0] = 1.35161;
+		mArmLeft90DegSeedVals[1] = 2.4953;
+		mArmLeft90DegSeedVals[2] = -1.98389;
+		mArmLeft90DegSeedVals[3] = 2.55776;
+		mArmLeft90DegSeedVals[4] = val;
+		for( std::size_t i = 0; i < mArmLeft90DegSeedVals.size(); ++i )
+		{
+			std::cerr << "New Joint " << i+1 << ": " << mArmLeft90DegSeedVals[i] << std::endl;
+		}
+		PublishJointValues(mArmLeft90DegSeedVals);
 	}
 }
 

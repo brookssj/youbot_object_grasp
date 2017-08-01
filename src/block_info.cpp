@@ -14,6 +14,9 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 	mRgbBlockLocSub = nh.subscribe( "/rgb_seg/block_location", 1, &cBlockInfo::BlockAlignLocationCallback, this );
 	mRgbBlockRotSub = nh.subscribe( "/rgb_seg/block_rotation", 1, &cBlockInfo::BlockAlignRotationCallback, this);
 	mRgbBlockDimSub = nh.subscribe( "/rgb_seg/block_dimension", 1, &cBlockInfo::BlockDimensionCallback, this);
+	mRgbFinalRotSub = nh.subscribe( "/final_block_rotation", 1, &cBlockInfo::FinalBlockRotationCallback, this);
+	//mStateControllerSub= nh.subscribe( "/control_current_state", 1, &cBlockInfo::StateCallback, this);
+	//controllerState = 0;
 
 	// Create the transform listener and then pause 2 seconds to allow tfs to buffer.
 	mpListener = new tf::TransformListener();
@@ -101,10 +104,20 @@ const float cBlockInfo::GetBlockAlignmentRotation() const
 	return mBlockAlignmentRotation;
 }
 
+const float cBlockInfo::GetFinalRotation() const
+{
+	return mFinalRotation;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //  Subscriber Functions
 ////////////////////////////////////////////////////////////////////////////////
 
+/*void cBlockInfo::StateCallback(const std_msgs::Int32& state)
+{
+	controllerState = state.data;
+}
+*/
 void cBlockInfo::BlockCallback(const geometry_msgs::Pose& pose_ASUStoBlock)
 {
 	if( mBlockFound )
@@ -190,21 +203,37 @@ void cBlockInfo::BlockAlignLocationCallback( const geometry_msgs::Point& loc )
 
 void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
 {
+	//mBlockAlignmentRotation = rot.data;
 	bool dims = GetBlockDimension();
 	float pi = 3.1415926535897931;
-	if (rot.data*-1 < 8 or rot.data*-1 > 80 and dims == false)
+	if (rot.data*-1 < 15 and dims == false)
+	{
+		mBlockAlignmentRotation = 1.40;
+	}
+	else if (rot.data*-1 > 80 and dims == true)
+	{
+		mBlockAlignmentRotation = 1.40;
+	}
+	else if (rot.data*-1 < 15 or rot.data*-1 > 80)
 	{
 		mBlockAlignmentRotation = 2.9883;
 	}
 	else
 	{
-		mBlockAlignmentRotation = rot.data*(-1)*pi/180;
+		mBlockAlignmentRotation = (rot.data*(-1)*pi)/180;
 	}
-
+	if (mBlockAlignmentRotation < .11 or mBlockAlignmentRotation > 8)
+	{
+		std::cout << "Uh oh, out of range. Reported " << mBlockAlignmentRotation << " as rotation." << std::endl;
+	}
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void cBlockInfo::FinalBlockRotationCallback(const std_msgs::Float32& rot)
+{
+	mFinalRotation = rot.data;
+}
 
 const bool cBlockInfo::GetBlockDimension() const
 {

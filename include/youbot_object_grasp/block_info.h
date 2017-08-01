@@ -38,6 +38,8 @@ public:
 	const tf::Vector3& GetBlockAlignmentPosition() const;
 	const float GetBlockAlignmentRotation() const;
 	const bool GetBlockDimension() const;
+	const float GetFinalRotation() const;
+
 	
 
 private:
@@ -51,6 +53,9 @@ private:
 	void BlockAlignLocationCallback( const geometry_msgs::Point& loc );
 	void BlockAlignRotationCallback ( const std_msgs::Float32& rot );
 	void BlockDimensionCallback ( const std_msgs::Bool& dim );
+	void FinalBlockRotationCallback(const std_msgs::Float32& rot);
+
+
 
 
 	//--------------------------------------------------------------------------//
@@ -69,6 +74,7 @@ private:
 	ros::Subscriber mRgbBlockLocSub;
 	ros::Subscriber mRgbBlockRotSub;
 	ros::Subscriber mRgbBlockDimSub;
+	ros::Subscriber mRgbFinalRotSub;
 
 	tf::Transform mG_A5ToAsus;
 	tf::Transform mG_AsusCorrection;
@@ -76,6 +82,7 @@ private:
 
 	tf::Vector3 mBlockAlignmentLocation;
 	float mBlockAlignmentRotation;
+	float mFinalRotation;
 
 	bool mCameraCalibrated;
 
