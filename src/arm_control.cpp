@@ -249,7 +249,7 @@ int main( int argc, char** argv )
 			double xCmdVel = 0;
 			double yCmdVel = 0;
 			const tf::Vector3& finalBlockLoc = pBlockInfo->GetBlockAlignmentPosition();
-			if( finalBlockLoc.getX() > 374.0 + 9.0 )
+			if( finalBlockLoc.getX() > 374.0 + 6.0 )
 			{
 				// Move towards front of base when grasping right, opposite when left
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
@@ -328,7 +328,7 @@ int main( int argc, char** argv )
 					if(rotation < 2.9883)
 					{
 						std::cout << "Moving base forward" << std::endl;
-						pBaseController->CommandBaseVelocity(.02, .0005, 0);
+						pBaseController->CommandBaseVelocity(.02, .0012, 0);
 						ros::Duration(7).sleep();
 						pArmInterface->SetLeftSeedVal(rotation, 2);
 						pBaseController->CommandBaseVelocity(-.02, 0, 0);
