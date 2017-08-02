@@ -14,7 +14,7 @@
   <!--      youBot Driver      -->
   <!-- /////////////////////// -->
 
-  <include file="$(find youbot_driver_ros_interface)/launch/youbot_driver.launch"/>
+  <!--include file="$(find youbot_driver_ros_interface)/launch/youbot_driver.launch"/-->
 
 
   <!-- /////////////////////// -->
