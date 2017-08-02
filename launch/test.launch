@@ -116,7 +116,7 @@
 	<!--   Object Segmentation   -->
 	<!-- /////////////////////// -->
 
-	<include file="$(find pcl_auto_seg)/launch/seg_block.launch"/>
+	<!-- include file="$(find pcl_auto_seg)/launch/seg_block.launch"/-->
 
   </group>
 
