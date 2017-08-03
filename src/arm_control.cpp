@@ -128,6 +128,8 @@ int main( int argc, char** argv )
 	// --- Begin --- //
 
 	bool graspingLeft = false;
+	std_msgs::Int32 temp_state;
+	std_msgs::Float32 temp_rot;
 	ProcessState currentState;
 	if (controllerState == 6)
 		{
@@ -138,7 +140,8 @@ int main( int argc, char** argv )
 			//pArmInterface->SetLeftSeedVal(1.4, 1);
 			//ros::Duration(3).sleep();
 			//pArmInterface->SetLeftSeedVal(2.0, 2);
-			mRotPub.publish(1.40);
+			temp_rot.data = 1.40;
+			mRotPub.publish(temp_rot);
 			currentState = GraspingBlock;
 			//pArmInterface->GoToLeftAlignPose();
 			//currentState = Finished;
@@ -223,7 +226,8 @@ int main( int argc, char** argv )
 			ros::Duration(4).sleep();  // Wait for the arm to get to the position.
 
 			controllerState = 4;
-			mStatePub.publish(controllerState);
+			temp_state.data = controllerState;
+			mStatePub.publish(temp_state);
 			currentState = GetBlockRotation;
 			std::cout << "Exiting MovingArmToSearchPose state" << std::endl;
 			break;
@@ -234,7 +238,8 @@ int main( int argc, char** argv )
 			ros::Duration(2).sleep();
 			float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();
 			std::cout << finalBlockRot << std::endl;
-			mRotPub.publish(finalBlockRot);
+			temp_rot.data = finalBlockRot;
+			mRotPub.publish(temp_rot);
 			if (finalBlockRot > 0.11 and finalBlockRot < 8)
 			{
 				std::cout << "finalBlockRot is " << finalBlockRot << std::endl;
@@ -361,7 +366,8 @@ int main( int argc, char** argv )
 				ros::Duration(4).sleep();
 			
 				controllerState = 0;
-				mStatePub.publish(controllerState);
+				temp_state.data = controllerState;
+				mStatePub.publish(temp_state);
 				currentState = PuttingArmInCarryPose;
 				std::cout << "Exiting GraspingBlock state" << std::endl;
 				break;
@@ -394,7 +400,8 @@ int main( int argc, char** argv )
 
 			//CurrentState = InitiatingReturnToStart;
 			controllerState=0;
-			mStatePub.publish(controllerState);
+			temp_state.data = controllerState;
+			mStatePub.publish(temp_state);
 			//currentState = PrepareForDrop;
 			currentState = Finished;
 			std::cout << "Exiting PuttingArmInCarryPose state" << std::endl;
