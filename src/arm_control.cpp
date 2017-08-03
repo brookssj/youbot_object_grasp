@@ -169,7 +169,7 @@ int main( int argc, char** argv )
 				// Drive the youBot next to the block.  Make sure we don't rotate
 				// based on the rotation matrix of the block itself.
 				tf::StampedTransform g_arm0_to_camera_link;
-				pListener->lookupTransform("arm_link_0", "camera_link", ros::Time(0), g_arm0_to_camera_link);
+				pListener->lookupTransform("arm_link_0", "camera_depth_optical_frame", ros::Time(0), g_arm0_to_camera_link);
 				pickupGoal = g_arm0_to_camera_link * pBlockInfo->GetTransformA5ToBlock();
 				if( pickupGoal.getOrigin().getY() < 0.0 )
 				{

@@ -86,8 +86,7 @@ tf::Transform cBlockInfo::GetTransformA5ToBlock() const
 
 	std::cout << std::endl;
 	
-
-	return mG_AsusToBlock;
+	return mG_AsusCorrection * mG_AsusToBlock;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
