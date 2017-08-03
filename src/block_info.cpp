@@ -22,7 +22,7 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 	mpListener = new tf::TransformListener();
 	ros::Duration(2).sleep();
 	
-	mCameraCalibrated = false;
+	mCameraCalibrated = true;
 	mBlockFound = false;
 
 	mG_AsusCorrection.setIdentity();
