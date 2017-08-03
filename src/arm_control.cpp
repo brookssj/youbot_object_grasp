@@ -342,6 +342,10 @@ int main( int argc, char** argv )
 						pBaseController->CommandBaseVelocity(0, 0, 0);
 
 					}
+					else if (rotation == 2.9883)
+					{
+						pArmInterface->GoToLeftGraspPose();
+					}
 					else
 					{
 						pArmInterface->SetLeftSeedVal(rotation, 2);

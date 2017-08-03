@@ -177,9 +177,9 @@ void cArmInterface::SetLeftSeedVal(float val, int pose)
 	if (pose==2)
 	{
 		mArmLeft90DegSeedVals[0] = 1.35161;
-		mArmLeft90DegSeedVals[1] = 2.4953;
-		mArmLeft90DegSeedVals[2] = -1.98389;
-		mArmLeft90DegSeedVals[3] = 2.55776;
+		mArmLeft90DegSeedVals[1] = 2.23; //2.4953;
+		mArmLeft90DegSeedVals[2] = -1.6; //-1.98389;
+		mArmLeft90DegSeedVals[3] = 2.71; //2.55776;
 		mArmLeft90DegSeedVals[4] = val;
 		for( std::size_t i = 0; i < mArmLeft90DegSeedVals.size(); ++i )
 		{
