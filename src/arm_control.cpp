@@ -168,18 +168,18 @@ int main( int argc, char** argv )
 				
 				// Drive the youBot next to the block.  Make sure we don't rotate
 				// based on the rotation matrix of the block itself.
-				tf::StampedTransform g_arm0_to_arm5;
-				pListener->lookupTransform("arm_link_0", "arm_link_5", ros::Time(0), g_arm0_to_arm5);
-				pickupGoal = g_arm0_to_arm5 * pBlockInfo->GetTransformA5ToBlock();
+				tf::StampedTransform g_arm0_to_camera_link;
+				pListener->lookupTransform("arm_link_0", "camera_link", ros::Time(0), g_arm0_to_camera_link);
+				pickupGoal = g_arm0_to_camera_link * pBlockInfo->GetTransformA5ToBlock();
 				if( pickupGoal.getOrigin().getY() < 0.0 )
 				{
 					graspingLeft = false;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.27 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.4 );
 				}
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.40 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.4 );
 				}
 
 				//pickupGoal.getOrigin().setX( pickupGoal.getOrigin().getX() + .10 );
