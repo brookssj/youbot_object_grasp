@@ -343,15 +343,16 @@ int main( int argc, char** argv )
 						pBaseController->CommandBaseVelocity(0, 0, 0);
 
 					}
-					else if (rotation == 2.9883)
+					else //if (rotation == 2.93883)
 					{
+						std::cout << "Grasping in vertical position" << std::endl;
 						pArmInterface->GoToLeftGraspPose();
 					}
-					else
+					/*else
 					{
 						pArmInterface->SetLeftSeedVal(rotation, 2);
 					}
-					//pArmInterface->GoToLeftGraspPose();
+					//pArmInterface->GoToLeftGraspPose();*/
 				}
 				else
 				{
