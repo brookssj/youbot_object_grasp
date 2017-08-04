@@ -250,6 +250,5 @@ void cArmInterface::GoToLeftAlignPose()
 
 void cArmInterface::GoToLeftGraspPose()
 {
-	//mArmLeft90DegSeedVals[4] = finalBlockRot;
 	PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
 }

@@ -215,7 +215,7 @@ void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
 	}
 	else if (rot.data*-1 < 15 or rot.data*-1 > 80)
 	{
-		mBlockAlignmentRotation = 2.9883;
+		mBlockAlignmentRotation = 2.93883;
 	}
 	else
 	{

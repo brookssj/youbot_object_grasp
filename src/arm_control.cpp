@@ -323,6 +323,7 @@ int main( int argc, char** argv )
 			}
 			else
 			{	std::cout << "Reaching to grasp." << std::endl;
+				std::cout << "Final Rotation is " << rotation << std::endl;
 				if( graspingLeft )
 				{
 					std::cout << "Rotating Grippers" << std::endl;
@@ -330,7 +331,7 @@ int main( int argc, char** argv )
 					pArmInterface->SetLeftSeedVal(rotation, 1);
 					ros::Duration(3).sleep();
 					
-					if(rotation < 2.9883)
+					if(rotation < 2.9)
 					{
 						std::cout << "Moving base forward" << std::endl;
 						pBaseController->CommandBaseVelocity(.02, .0012, 0);
