@@ -119,8 +119,8 @@ const float cBlockInfo::GetFinalRotation() const
 */
 void cBlockInfo::BlockCallback(const geometry_msgs::Pose& pose_ASUStoBlock)
 {
-	if( mBlockFound )
-		return;
+	//if( mBlockFound )
+	//	return;
 	
 	std::cout << "Received block pose!" << std::endl;
 

@@ -126,6 +126,7 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 	pose.orientation.x = q.getX();
 	pose.orientation.y = q.getY();
 	pose.orientation.z = q.getZ();
+	std::cout << "w: " << pose.orientation.w << " x: " << pose.orientation.x << " y: " << pose.orientation.y << " z: " << pose.orientation.z << std::endl;
 
     if( mpArmKinematics->getPositionIK(pose, seedVals, solution, error_code) )
 	{
@@ -232,11 +233,28 @@ void cArmInterface::GoToRightGraspPose()
 	PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
 }
 
+void cArmInterface::GoToRightGraspPose(const tf::Transform& g)
+{
+	PositionArm(g, mArmRight90DegSeedVals);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void cArmInterface::GoToLeftHomePose()
 {
 	PositionArm( mG_LeftHomePose_05, mArmLeft90DegSeedVals );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void cArmInterface::GoToLeftAlignPose2()
+{
+	mArmLeft90DegSeedVals[0] = 4.56;
+	mArmLeft90DegSeedVals[1] = 2.7042;
+	mArmLeft90DegSeedVals[2] = -4.4000;
+	mArmLeft90DegSeedVals[3] = 0.0603;
+	mArmLeft90DegSeedVals[4] = 2.93883;
+	PublishJointValues(mArmLeft90DegSeedVals);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,4 +269,9 @@ void cArmInterface::GoToLeftAlignPose()
 void cArmInterface::GoToLeftGraspPose()
 {
 	PositionArm( mG_LeftGraspPose_05, mArmLeft90DegSeedVals );
+}
+
+void cArmInterface::GoToLeftGraspPose(const tf::Transform& g)
+{
+	PositionArm(g, mArmLeft90DegSeedVals);
 }

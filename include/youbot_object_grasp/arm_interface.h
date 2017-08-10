@@ -60,10 +60,13 @@ public:
 	void GoToRightHomePose();
 	void GoToRightAlignPose();
 	void GoToRightGraspPose();
+	void GoToRightGraspPose(const tf::Transform& g);
 
 	void GoToLeftHomePose();
 	void GoToLeftAlignPose();
+	void GoToLeftAlignPose2();
 	void GoToLeftGraspPose();
+	void GoToLeftGraspPose(const tf::Transform& g);
 
 	
 //protected:

@@ -316,68 +316,79 @@ int main( int argc, char** argv )
 			ros::Duration(4).sleep();
 
 			// --- Establish Goal Position --- //
-			float rotation = pBlockInfo->GetFinalRotation();
-			if (rotation < .11)
+			//float rotation = pBlockInfo->GetFinalRotation();
+			
+			//---Set Up Tf---//
+			tf::StampedTransform g_arm0_to_camera_link;
+			pListener->lookupTransform("arm_link_0", "camera_depth_optical_frame", ros::Time(0), g_arm0_to_camera_link);
+			pickupGoal = g_arm0_to_camera_link * pBlockInfo->GetTransformA5ToBlock();
+
+			//Just using this function to see goalPose in rviz, otherwise comment out when using actual youbot
+			pBaseController->MoveRelativeToArmLink0( pickupGoal );
+
+
+			/*if (rotation < .11)
 			{
 				break;
 			}
+			else*/
+			std::cout << "Reaching to grasp." << std::endl;
+			//std::cout << "Final Rotation is " << rotation << std::endl;
+			if( graspingLeft )
+			{
+				/*std::cout << "Rotating Grippers" << std::endl;
+				ros::Duration(2).sleep();
+				pArmInterface->SetLeftSeedVal(rotation, 1);
+				ros::Duration(3).sleep();*/
+
+				//pArmInterface->GoToLeftGraspPose(pickupGoal);
+				
+				/*if(rotation < 2.9)
+				{
+					std::cout << "Moving base forward" << std::endl;
+					pBaseController->CommandBaseVelocity(.02, .01, 0);
+					ros::Duration(6).sleep();
+					pArmInterface->SetLeftSeedVal(rotation, 2);
+					pBaseController->CommandBaseVelocity(-.02, 0, 0);
+					std::cout << "Moving base backward" << std::endl;
+					ros::Duration(6).sleep();
+					pBaseController->CommandBaseVelocity(0, 0, 0);
+
+				}
+				else //if (rotation == 2.93883)
+				{
+					std::cout << "Grasping in vertical position" << std::endl;
+					pArmInterface->GoToLeftGraspPose();
+				}
+				/*else
+				{
+					pArmInterface->SetLeftSeedVal(rotation, 2);
+				}
+				//pArmInterface->GoToLeftGraspPose();*/
+				}
 			else
-			{	std::cout << "Reaching to grasp." << std::endl;
-				std::cout << "Final Rotation is " << rotation << std::endl;
-				if( graspingLeft )
-				{
-					std::cout << "Rotating Grippers" << std::endl;
-					ros::Duration(2).sleep();
-					pArmInterface->SetLeftSeedVal(rotation, 1);
-					ros::Duration(3).sleep();
-					
-					if(rotation < 2.9)
-					{
-						std::cout << "Moving base forward" << std::endl;
-						pBaseController->CommandBaseVelocity(.02, .0012, 0);
-						ros::Duration(7).sleep();
-						pArmInterface->SetLeftSeedVal(rotation, 2);
-						pBaseController->CommandBaseVelocity(-.02, 0, 0);
-						std::cout << "Moving base backward" << std::endl;
-						ros::Duration(7).sleep();
-						pBaseController->CommandBaseVelocity(0, 0, 0);
-
-					}
-					else //if (rotation == 2.93883)
-					{
-						std::cout << "Grasping in vertical position" << std::endl;
-						pArmInterface->GoToLeftGraspPose();
-					}
-					/*else
-					{
-						pArmInterface->SetLeftSeedVal(rotation, 2);
-					}
-					//pArmInterface->GoToLeftGraspPose();*/
-				}
-				else
-				{
-					//mArmRight90DegSeedVals[4] = finalBlockRot;
-					//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );
-					pArmInterface->SetRightSeedVal(4, rotation, 1);
-					ros::Duration(3).sleep();
-					pArmInterface->SetRightSeedVal(4, rotation, 2);
-					//pArmInterface->GoToRightGraspPose();
-				}
-				std::cout << "Waiting 3 seconds to allow arm to finish moving." << std::endl;
-				ros::Duration(3.0).sleep();
-
-				std::cout << "Closing grippers" << std::endl;
-				pArmInterface->CloseGrippers();
-				std::cout << "Waiting 4 seconds to allow grippers to close." << std::endl;
-				ros::Duration(4).sleep();
-			
-				controllerState = 0;
-				temp_state.data = controllerState;
-				mStatePub.publish(temp_state);
-				currentState = PuttingArmInCarryPose;
-				std::cout << "Exiting GraspingBlock state" << std::endl;
-				break;
+			{
+				/*//mArmRight90DegSeedVals[4] = finalBlockRot;
+				//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );					pArmInterface->SetRightSeedVal(4, rotation, 1);
+				ros::Duration(3).sleep();
+				pArmInterface->SetRightSeedVal(4, rotation, 2);*/
+				pArmInterface->GoToRightGraspPose(pickupGoal);
 			}
+			std::cout << "Waiting 3 seconds to allow arm to finish moving." << std::endl;
+			ros::Duration(3.0).sleep();
+
+			std::cout << "Closing grippers" << std::endl;
+			pArmInterface->CloseGrippers();
+			std::cout << "Waiting 4 seconds to allow grippers to close." << std::endl;
+			ros::Duration(4).sleep();
+			
+			controllerState = 0;
+			temp_state.data = controllerState;
+			mStatePub.publish(temp_state);
+			currentState = PuttingArmInCarryPose;
+			std::cout << "Exiting GraspingBlock state" << std::endl;
+			break;
+			
 		}
 
 		
