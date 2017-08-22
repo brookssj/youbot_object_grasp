@@ -10,6 +10,8 @@
 cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 {
     mBlockPoseSub = nh.subscribe( "/block_pose", 1, &cBlockInfo::BlockCallback, this );
+    mBlockPointSub = nh.subscribe( "/block_point", 1, &cBlockInfo::BlockPointCallback, this );
+    mBlockPoseSub2 = nh.subscribe("/block_pose", 1, &cBlockInfo::BlockCallback2, this );
 	mFloorNormalSub = nh.subscribe( "/floor_normal", 1, &cBlockInfo::FloorNormalCallback, this );
 	mRgbBlockLocSub = nh.subscribe( "/rgb_seg/block_location", 1, &cBlockInfo::BlockAlignLocationCallback, this );
 	mRgbBlockRotSub = nh.subscribe( "/rgb_seg/block_rotation", 1, &cBlockInfo::BlockAlignRotationCallback, this);
@@ -24,6 +26,7 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 	
 	mCameraCalibrated = true;
 	mBlockFound = false;
+	
 
 	mG_AsusCorrection.setIdentity();
 
@@ -119,8 +122,8 @@ const float cBlockInfo::GetFinalRotation() const
 */
 void cBlockInfo::BlockCallback(const geometry_msgs::Pose& pose_ASUStoBlock)
 {
-	//if( mBlockFound )
-	//	return;
+	if( mBlockFound )
+		return;
 	
 	std::cout << "Received block pose!" << std::endl;
 
@@ -155,6 +158,15 @@ void cBlockInfo::BlockCallback(const geometry_msgs::Pose& pose_ASUStoBlock)
 	mBlockFound = true;
 }
 
+void cBlockInfo::BlockCallback2(const geometry_msgs::Pose& pose_ASUStoBlock)
+{
+	camToBlock = GetTransformFromPose(pose_ASUStoBlock);
+}
+
+void cBlockInfo::BlockPointCallback(const geometry_msgs::PointStamped& point_ASUStoBlock)
+{
+	camToBlock = GetTransformFromPoint(point_ASUStoBlock);
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 void cBlockInfo::FloorNormalCallback( const geometry_msgs::Vector3& norm )
@@ -239,6 +251,10 @@ const bool cBlockInfo::GetBlockDimension() const
 	return blockDimension;
 }
 
+tf::Transform cBlockInfo::GetTransformCamToBlock() const
+{
+	return camToBlock;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 void cBlockInfo::BlockDimensionCallback(const std_msgs::Bool& dim)
@@ -257,3 +273,10 @@ tf::Transform cBlockInfo::GetTransformFromPose(const geometry_msgs::Pose& pose)
 	return tf::Transform( q, t );
 }
 
+tf::Transform cBlockInfo::GetTransformFromPoint(const geometry_msgs::PointStamped& point)
+{
+	tf::Quaternion q( 0.70381, -0.674817, -0.157957, -0.155958 );
+	tf::Vector3 t( point.point.x, point.point.y, point.point.z );
+
+	return tf::Transform( q, t );
+}

@@ -65,8 +65,12 @@ public:
 	void GoToLeftHomePose();
 	void GoToLeftAlignPose();
 	void GoToLeftAlignPose2();
+	void GoToLeftAlignPoseIntermediate();
+	void TestLeftGraspPose();
 	void GoToLeftGraspPose();
 	void GoToLeftGraspPose(const tf::Transform& g);
+	void SetLeftSeedVal(const tf::Transform& g, float val);
+
 
 	
 //protected:

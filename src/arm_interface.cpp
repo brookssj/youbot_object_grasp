@@ -118,6 +118,8 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 	pose.position.x = position.getX();
 	pose.position.y = position.getY();
 	pose.position.z = position.getZ();
+	std::cout << "x: " << pose.position.x << " y: " << pose.position.y << " z: " << pose.position.z << std::endl;
+
 
 	const tf::Matrix3x3& rot = g.getBasis();
 	tf::Quaternion q;
@@ -189,6 +191,15 @@ void cArmInterface::SetLeftSeedVal(float val, int pose)
 		PublishJointValues(mArmLeft90DegSeedVals);
 	}
 }
+void cArmInterface::SetLeftSeedVal(const tf::Transform& g, float val)
+{
+	mArmLeft90DegSeedVals[0] = 1.37;
+	mArmLeft90DegSeedVals[1] = 2.04427;
+	mArmLeft90DegSeedVals[2] = -1.51891;
+	mArmLeft90DegSeedVals[3] = 2.54343;
+	mArmLeft90DegSeedVals[4] = val;
+	PositionArm(g, mArmLeft90DegSeedVals);
+}
 
 void cArmInterface::OpenGrippers()
 {
@@ -249,14 +260,34 @@ void cArmInterface::GoToLeftHomePose()
 
 void cArmInterface::GoToLeftAlignPose2()
 {
+
 	mArmLeft90DegSeedVals[0] = 4.56;
-	mArmLeft90DegSeedVals[1] = 2.7042;
+	mArmLeft90DegSeedVals[1] = 2.61;
 	mArmLeft90DegSeedVals[2] = -4.4000;
 	mArmLeft90DegSeedVals[3] = 0.0603;
 	mArmLeft90DegSeedVals[4] = 2.93883;
 	PublishJointValues(mArmLeft90DegSeedVals);
 }
 
+void cArmInterface::GoToLeftAlignPoseIntermediate()
+{
+	mArmLeft90DegSeedVals[0] = 4.56;
+	mArmLeft90DegSeedVals[1] = 0.3;
+	mArmLeft90DegSeedVals[2] = -1;
+	mArmLeft90DegSeedVals[3] = 2;
+	mArmLeft90DegSeedVals[4] = 2.93883;
+	PublishJointValues(mArmLeft90DegSeedVals);	
+}
+
+void cArmInterface::TestLeftGraspPose()
+{
+	mArmLeft90DegSeedVals[0] = 1.35166;
+	mArmLeft90DegSeedVals[1] = 2.61;
+	mArmLeft90DegSeedVals[2] = -4.4000;
+	mArmLeft90DegSeedVals[3] = 0.0603;
+	mArmLeft90DegSeedVals[4] = 2.93883;
+	PublishJointValues(mArmLeft90DegSeedVals);
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 void cArmInterface::GoToLeftAlignPose()
@@ -273,5 +304,11 @@ void cArmInterface::GoToLeftGraspPose()
 
 void cArmInterface::GoToLeftGraspPose(const tf::Transform& g)
 {
+	/*tf::Quaternion q = g.getRotation();
+	tf::Vector3 t = g.getOrigin();
+	t.setZ(-0.0167221);
+	tf::Transform f;
+	f.setRotation(q);
+	f.setOrigin(t); */
 	PositionArm(g, mArmLeft90DegSeedVals);
 }
