@@ -70,6 +70,9 @@ public:
 	void GoToLeftGraspPose();
 	void GoToLeftGraspPose(const tf::Transform& g);
 	void SetLeftSeedVal(const tf::Transform& g, float val);
+	void MoveArm(const tf::Transform& g, std::vector<double> v);
+	void MoveArm(std::vector<double> v);
+
 
 
 	
@@ -94,6 +97,8 @@ public:
 
 	std::vector<double> mCameraSearchPoseSeedVals;
 	tf::Transform mG_CameraSearch_05;
+	std::vector<double> Max;
+	std::vector<double> Min;
 
 	std::vector<double> mArmRight90DegSeedVals;
 	tf::Transform mG_RightHomePose_05;

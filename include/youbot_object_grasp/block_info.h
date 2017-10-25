@@ -8,10 +8,12 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Bool.h>
 #include <tf/LinearMath/Transform.h>
 #include <tf/LinearMath/Vector3.h>
 #include <tf/transform_listener.h>
+#include <brics_actuator/JointPositions.h>
 
 
 class cBlockInfo
@@ -33,6 +35,7 @@ public:
 
 	bool BlockFound() const;
 	bool blockDimension;
+	std::vector<double> arm_state;
 
 	tf::Transform GetTransformA5ToBlock() const;
 	tf::Transform GetTransformCamToBlock() const;
@@ -42,7 +45,7 @@ public:
 	const float GetBlockAlignmentRotation() const;
 	const bool GetBlockDimension() const;
 	const float GetFinalRotation() const;
-
+	const std::vector<double> GetArmPosition() const;
 	
 
 private:
@@ -59,6 +62,9 @@ private:
 	void FinalBlockRotationCallback(const std_msgs::Float32& rot); 
 	void BlockPointCallback (const geometry_msgs::PointStamped& point_ASUStoBlock);
 	void BlockCallback2(const geometry_msgs::Pose& pose_ASUStoBlock);
+	//void ArmPosCallback( std_msgs::Float32MultiArray pos);
+	void ArmPosCallback(const brics_actuator::JointPositions state);
+
 
 
 
@@ -83,6 +89,7 @@ private:
 	ros::Subscriber mRgbFinalRotSub;
 	ros::Subscriber mBlockPointSub;
 	ros::Subscriber mBlockPoseSub2;
+	ros::Subscriber mArmPosSub;
 
 	tf::Transform mG_A5ToAsus;
 	tf::Transform mG_AsusCorrection;

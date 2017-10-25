@@ -8,7 +8,7 @@
   <arg name="db" default="false" />
 
   <!-- By default, we are not in debug mode -->
-  <arg name="debug" default="true" />
+  <arg name="debug" default="false" />
 
   <!-- By default we will launch Gazebo since this is a testing setup -->
   <arg name="launch_gazebo" default="false"/>
