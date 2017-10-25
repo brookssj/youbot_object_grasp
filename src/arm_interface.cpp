@@ -21,6 +21,19 @@ cArmInterface::cArmInterface(const tf::Transform& g_arm0_to_base_link)
     mpArmKinematics = loader.createInstance("youbot_arm_kinematics_moveit::KinematicsPlugin");
 	mpArmKinematics->initialize("/robot_description", "arm_1", "arm_link_0", "arm_link_5", 0.1);
 
+	// --- Define Maximum and Minimum Joint Angles --//
+	Max.resize(5);
+	Min.resize(5);
+	Max[0] = 8;
+	Max[1] = 2.61799;
+	Max[2] = 8;
+	Max[3] = 3.4292;
+ 	Max[4] = 8;
+	Min[0] = -8;
+	Min[1] = 0.0100692;
+	Min[2] = -8;
+	Min[3] = 0.0221239;
+	Min[4] = -8;
 	
 	// --- Define the Camera Search pose --- //
 
@@ -134,11 +147,26 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 	{
 		std::cerr << "Found a solution" << std::endl;
 		std::cerr << "Size of solution:  " << solution.size() << std::endl;
+		
+		for ( std::size_t i = 0; i < solution.size(); ++i )
+		{
+			if (solution[i] > Max[i])
+			{
+				std::cerr << "Exceeded Maximum value: " << solution[i] << " Maximum value is " << Max[i];
+				solution[i] = Max[i];
+			}
+		}
+
+		if (solution[4] != seedVals[4])
+		{
+			solution[4] = seedVals[4];
+		}
+
 		for( std::size_t i = 0; i < solution.size(); ++i )
 		{
 			std::cerr << "Joint " << i+1 << ":  " << solution[i] << std::endl;
 		}
-
+		
 		PublishJointValues(solution);
 	}
 	else
@@ -148,7 +176,30 @@ bool cArmInterface::PositionArm(const tf::Transform& g, const std::vector<double
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void cArmInterface::MoveArm(std::vector<double> v)
+{
+	for (int i=0; i < v.size(); ++i)
+	{
+		if (v[i] > Max[i])
+		{
+			v[i] = Max[i];
+		}
 
+		if (v[i] < Min[i])
+		{
+			v[i] = Min[i];
+		}
+	}
+	PublishJointValues(v);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void cArmInterface::MoveArm(const tf::Transform& g, std::vector<double> v)
+{
+	PositionArm(g, v);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void cArmInterface::SetRightSeedVal(int index, float val, int pose)
 {
 	mArmRight90DegSeedVals[index] = val;

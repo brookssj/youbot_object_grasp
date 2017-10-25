@@ -17,8 +17,9 @@ cBlockInfo::cBlockInfo(ros::NodeHandle& nh)
 	mRgbBlockRotSub = nh.subscribe( "/rgb_seg/block_rotation", 1, &cBlockInfo::BlockAlignRotationCallback, this);
 	mRgbBlockDimSub = nh.subscribe( "/rgb_seg/block_dimension", 1, &cBlockInfo::BlockDimensionCallback, this);
 	mRgbFinalRotSub = nh.subscribe( "/final_block_rotation", 1, &cBlockInfo::FinalBlockRotationCallback, this);
-	//mStateControllerSub= nh.subscribe( "/control_current_state", 1, &cBlockInfo::StateCallback, this);
-	//controllerState = 0;
+	//mArmPosSub = nh.subscribe("/current_arm_state", 2, &cBlockInfo::ArmPosCallback, this);
+  	mArmPosSub = nh.subscribe("/arm_1/arm_controller/position_command", 1, &cBlockInfo::ArmPosCallback, this);
+
 
 	// Create the transform listener and then pause 2 seconds to allow tfs to buffer.
 	mpListener = new tf::TransformListener();
@@ -111,6 +112,12 @@ const float cBlockInfo::GetFinalRotation() const
 	return mFinalRotation;
 }
 
+const std::vector<double> cBlockInfo::GetArmPosition() const
+{
+	std::cout << "arm joint 1:" << arm_state[0] << std::endl;
+	return arm_state;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //  Subscriber Functions
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +127,38 @@ const float cBlockInfo::GetFinalRotation() const
 	controllerState = state.data;
 }
 */
+/*void cBlockInfo::ArmPosCallback( std_msgs::Float32MultiArray pos)
+{
+	std::cout << std::endl;
+	arm_state.clear();
+	arm_state.resize(5);
+	arm_state[0] = double(pos.data[0]);
+	arm_state[1] = double(pos.data[1]);
+	arm_state[2] = double(pos.data[2]);
+	arm_state[3] = double(pos.data[3]);
+	arm_state[4] = double(pos.data[4]);
+	std::cout << "New arm position received! Joint one value is " << arm_state[0] << std::endl;
+	std::cout << std::endl;
+}*/
+
+void cBlockInfo::ArmPosCallback(const brics_actuator::JointPositions state)
+{
+	std::cout << std::endl;
+	arm_state.clear();
+	arm_state.resize(5);
+	arm_state[0] = double(state.positions[0].value);
+	arm_state[1] = double(state.positions[1].value);
+	arm_state[2] = double(state.positions[2].value);
+	arm_state[3] = double(state.positions[3].value);
+	arm_state[4] = double(state.positions[4].value);
+	std::cout << "New arm position received!" << std::endl;
+	for( int i = 0; i < state.positions.size(); ++i )
+	{
+		std::cout << "Joint " << i+1 << ":  " << state.positions[i].value << std::endl;
+	}
+  	std::cout << std::endl;
+}
+
 void cBlockInfo::BlockCallback(const geometry_msgs::Pose& pose_ASUStoBlock)
 {
 	if( mBlockFound )
@@ -219,11 +258,11 @@ void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
 	float pi = 3.1415926535897931;
 	if (rot.data*-1 < 15 and dims == false)
 	{
-		mBlockAlignmentRotation = 1.40;
+		mBlockAlignmentRotation = 2.93883;//4.40;
 	}
 	else if (rot.data*-1 > 80 and dims == true)
 	{
-		mBlockAlignmentRotation = 1.40;
+		mBlockAlignmentRotation = 2.93883; //4.40;
 	}
 	else if (rot.data*-1 < 15 or rot.data*-1 > 80)
 	{
@@ -231,7 +270,7 @@ void cBlockInfo::BlockAlignRotationCallback( const std_msgs::Float32& rot)
 	}
 	else
 	{
-		mBlockAlignmentRotation = (rot.data*(-1)*pi)/180;
+		mBlockAlignmentRotation = 2.93883; //(rot.data*(-1)*pi)/180;
 	}
 	if (mBlockAlignmentRotation < .11 or mBlockAlignmentRotation > 8)
 	{

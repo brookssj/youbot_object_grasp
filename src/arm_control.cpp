@@ -34,6 +34,8 @@ enum ProcessState
 	GetBlockRotation,
 	AligningToBlock,
 	GetBlockLocation,
+	ReachingToGrasp,
+	RotatingGripperToReach,
 	GraspingBlock,
 	PuttingArmInCarryPose,
 	//InitingReturnToStart,
@@ -42,6 +44,7 @@ enum ProcessState
 	DropBlock,
 	//ReturnToPickupPoint,
 	//MoveToFinish,
+	OpenAndClose,
 	Finished
 };
 
@@ -52,7 +55,8 @@ int main( int argc, char** argv )
     ros::NodeHandle nh("~");
     ros::Publisher mStatePub = nh.advertise<std_msgs::Int32>( "/control_current_state", 1 );
     ros::Publisher mRotPub = nh.advertise<std_msgs::Float32>( "/final_block_rotation", 1 );
-    int controllerState = 0;
+    int controllerState = 6;
+    float z = 0;
 
 
 	// --- Constants --- //
@@ -113,22 +117,20 @@ int main( int argc, char** argv )
 		}
 	}
 
-
-	// --- Position Arm --- //
-
-	std::cout << "Driving arm to camera position." << std::endl;
-	pArmInterface->GoToCameraSearchPose();
-	ros::Duration(3).sleep();  // Wait for the arm to get to the position.
-
-
 	// --- Block Info --- //
 	
 	cBlockInfo* pBlockInfo = new cBlockInfo(nh);
 
 
+	// --- Position Arm --- //
+	/*std::cout << "Driving arm to camera position." << std::endl;
+	pArmInterface->GoToCameraSearchPose();
+	ros::Duration(4).sleep();  // Wait for the arm to get to the position.*/
+	
+
 	// --- Begin --- //
 
-	bool graspingLeft = false;
+	bool graspingLeft = true;
 	std_msgs::Int32 temp_state;
 	std_msgs::Float32 temp_rot;
 	ProcessState currentState;
@@ -142,11 +144,13 @@ int main( int argc, char** argv )
 			ros::Duration(3).sleep();
 			pArmInterface->GoToLeftGraspPose();*/
 			//pArmInterface->OpenGrippers();
+			//pArmInterface->TestLeftGraspPose();
+			//ros::Duration(4).sleep();
 			currentState = MovingArmToSearchPose;
 			//currentState = GetBlockLocation;
 		} 
 	else
-		{	currentState = WaitingForBlock;
+		{	currentState = OpenAndClose;
 		}
 
 	tf::Transform g_StartingPose_w;
@@ -172,12 +176,12 @@ int main( int argc, char** argv )
 				if( pickupGoal.getOrigin().getY() < 0.0 )
 				{
 					graspingLeft = false;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() + 0.4 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY()); //+ 0.4 );
 				}
 				else
 				{
 					graspingLeft = true;
-					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY() - 0.4 );
+					pickupGoal.getOrigin().setY( pickupGoal.getOrigin().getY()); // - 0.4 );
 				}
 
 				//pickupGoal.getOrigin().setX( pickupGoal.getOrigin().getX() + .10 );
@@ -233,9 +237,8 @@ int main( int argc, char** argv )
 
 		case GetBlockRotation:
 		{
-			ros::Duration(2).sleep();
 			float finalBlockRot = pBlockInfo->GetBlockAlignmentRotation();
-			std::cout << finalBlockRot << std::endl;
+			//std::cout << finalBlockRot << std::endl;
 			temp_rot.data = finalBlockRot;
 			mRotPub.publish(temp_rot);
 			if (finalBlockRot > 0.11 and finalBlockRot < 8)
@@ -263,12 +266,12 @@ int main( int argc, char** argv )
 				xCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
 
-			if( finalBlockLoc.getY() > 275 + 15) //425.0 + 5.0 )
+			if( finalBlockLoc.getY() > 322 + 10)//275 + 45) //425.0 + 5.0 )
 			{
 				// Move to the left when grasping right, opposite when left
 				yCmdVel = graspingLeft ? -adjustmentBaseSpeed : adjustmentBaseSpeed;
 			}
-			else if( finalBlockLoc.getY() < 275 - 15) //425.0 - 5 )
+			else if( finalBlockLoc.getY() < 275 - 10) //425.0 - 5 )
 			{
 				// Move to the right when grasping right, opposite when left
 				yCmdVel = graspingLeft ? adjustmentBaseSpeed : -adjustmentBaseSpeed;
@@ -302,7 +305,7 @@ int main( int argc, char** argv )
 
 		case GetBlockLocation:
 		{
-			ros::Duration(2).sleep();
+			ros::Duration(4).sleep();
 			pickupGoal = pBlockInfo->GetTransformCamToBlock();
 			const tf::Vector3& position = pickupGoal.getOrigin();
 			float block_x = position.getX();
@@ -319,12 +322,13 @@ int main( int argc, char** argv )
 			{
 				//pickupGoal = g_arm0_to_camera_link * pickupGoal;
 				pickupGoal.getOrigin().setZ(-0.016);
-				if (block_x >= 0)
+				std::cout << "First x: " << pickupGoal.getOrigin().getX() << std::endl;
+				if (block_x >= -0.1)
 				{
-					pickupGoal.getOrigin().setX(pickupGoal.getOrigin().getX()- 0.025);//0.065);
+					pickupGoal.getOrigin().setX(pickupGoal.getOrigin().getX()); //- 0.029);//0.025);
 				}
-				std::cout << "x: " << block_x << " y: " << block_y << " z: " << block_z <<std::endl;
-				currentState = GraspingBlock;
+				std::cout << "x: " << pickupGoal.getOrigin().getX() << " y: " << block_y << " z: " << block_z <<std::endl;
+				currentState = ReachingToGrasp;
 				controllerState = 0;
 				temp_state.data = controllerState;
 				mStatePub.publish(temp_state);
@@ -332,59 +336,73 @@ int main( int argc, char** argv )
 			break;
 		}
 		
-		case GraspingBlock:
+		case ReachingToGrasp:
 		{
 			std::cout << std::endl;
-			std::cout << "Entering GraspingBlock state" << std::endl;
-			std::cout << "Waiting 2 seconds to allow arm to finish moving." << std::endl;
-			ros::Duration(2).sleep();
+			std::cout << "Entering ReachingToGrasp state" << std::endl;
 
 			std::cout << "Opening grippers" << std::endl;
 			pArmInterface->OpenGrippers();
 			std::cout << "Waiting 4 seconds to allow grippers to open." << std::endl;
 			ros::Duration(4).sleep();
 
+			std::cout << "Reaching to grasp." << std::endl;
+
+			pArmInterface->TestLeftGraspPose();
+			ros::Duration(4).sleep();
+			z = pickupGoal.getOrigin().getZ();
+			pickupGoal.getOrigin().setZ(z + 0.09);
+			std::cout << "Moving above goal position" << std::endl;
+			pArmInterface->GoToLeftGraspPose(pickupGoal);
+			std::cout << "Waiting for arm to move" << std::endl;
+			ros::Duration(6).sleep();
+			currentState = RotatingGripperToReach;
+			//currentState = Finished;
+			break;
+		}
+
+		case RotatingGripperToReach:
+		{
 			// --- Establish Goal Position --- //
 			float rotation = pBlockInfo->GetFinalRotation();
-			std::cout << rotation << std::endl;
-			
 
-			/*if (rotation < .11)
+			std::vector<double> arm_joint_values;
+			arm_joint_values.resize(5);
+			arm_joint_values = pBlockInfo->GetArmPosition();
+			//pArmInterface->SetLeftSeedVal(pickupGoal, rotation);
+			std::cout << "Rotating gripper above goal position" << std::endl;
+			//arm_joint_values = pBlockInfo->GetArmPosition();
+			arm_joint_values[4] = rotation;
+			pArmInterface->MoveArm(arm_joint_values);
+			ros::Duration(4).sleep();
+			currentState = GraspingBlock;
+			break;
+		}
+
+		case GraspingBlock:
+		{
+
+			std::vector<double> arm_joint_values;
+			arm_joint_values.resize(5);
+			arm_joint_values = pBlockInfo->GetArmPosition();
+			std::cout << "z is " << z << std::endl;
+			pickupGoal.getOrigin().setZ(z);
+			if (arm_joint_values[4] == 4.4)
 			{
-				break;
+				pickupGoal.getOrigin().setY(pickupGoal.getOrigin().getY()); //- 0.009 ); //055);
 			}
-			else*/
-			std::cout << "Reaching to grasp." << std::endl;
-			//std::cout << "Final Rotation is " << rotation << std::endl;
-			if( graspingLeft )
+			std::cout << "Picking up block" << std::endl;
+			pArmInterface->MoveArm(pickupGoal, arm_joint_values);					
+		//		}
+			//}
+			/*else
 			{
-                std::vector<double> arm_joint_values
-				pArmInterface->TestLeftGraspPose();
-				ros::Duration(3).sleep();
-				if (rotation != 2.93883)
-				{
-					float z = pickupGoal.getOrigin().getZ();
-					pickupGoal.getOrigin().setZ(z + 0.09);
-					pArmInterface->SetLeftSeedVal(pickupGoal, rotation);
-					ros::Duration(4).sleep();
-					pickupGoal.getOrigin().setZ(z);
-					pArmInterface->SetLeftSeedVal(pickupGoal, rotation);					
-				}
-				else
-				{
-					pArmInterface->GoToLeftGraspPose(pickupGoal);
-				}
-				//ros::Duration(3).sleep();
-				//pArmInterface->GoToLeftGraspPose();
-				}
-			else
-			{
-				/*//mArmRight90DegSeedVals[4] = finalBlockRot;
+				//mArmRight90DegSeedVals[4] = finalBlockRot;
 				//pArmInterface->PositionArm( mG_RightGraspPose_05, mArmRight90DegSeedVals );					pArmInterface->SetRightSeedVal(4, rotation, 1);
 				ros::Duration(3).sleep();
-				pArmInterface->SetRightSeedVal(4, rotation, 2);*/
+				pArmInterface->SetRightSeedVal(4, rotation, 2);
 				pArmInterface->GoToRightGraspPose(pickupGoal);
-			}
+			}*/
 			std::cout << "Waiting 3 seconds to allow arm to finish moving." << std::endl;
 			ros::Duration(3.0).sleep();
 
@@ -462,8 +480,8 @@ int main( int argc, char** argv )
 				std::cout << std::endl;
 			}
 			break;
-		}
-		*/
+		}*/
+		
 		
 		case PrepareForDrop:
 		{
@@ -538,6 +556,17 @@ int main( int argc, char** argv )
 		}
 		
 		*/
+
+		case OpenAndClose:
+		{
+			pArmInterface->CloseGrippers();
+			ros::Duration(3.0).sleep();
+			pArmInterface->OpenGrippers();
+			ros::Duration(3.0).sleep();
+			//pArmInterface->CloseGrippers();
+			currentState = Finished;
+			break;
+		}
 
 		default:
 			break;
